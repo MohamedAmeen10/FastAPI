@@ -32,11 +32,10 @@ if operation == "Get Student by ID":
     stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/student/{stud_id}")
+        response = requests.get(f"{BASE_URL}/studentid/{stud_id}")
         if response.status_code == 200:
             student = response.json()
-            st.write(f"Name: {student['name']}")
-            st.write(f"Age: {student['age']}")
+            st.write(student)
         else:
             st.error(f"Error: {response.json()['detail']}")
 
