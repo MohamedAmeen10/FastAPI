@@ -26,15 +26,17 @@ if operation == "Create Student":
         else:
             st.error(f"Error: {response.json()['detail']}")
 
+# Get a student by ID
 if operation == "Get Student by ID":
     st.header("Get Student by ID")
     stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/studentid/{stud_id}")
+        response = requests.get(f"{BASE_URL}/student/{stud_id}")
         if response.status_code == 200:
             student = response.json()
-            st.write(student)
+            st.write(f"Name: {student['name']}")
+            st.write(f"Age: {student['age']}")
         else:
             st.error(f"Error: {response.json()['detail']}")
 
