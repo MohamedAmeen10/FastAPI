@@ -1,24 +1,16 @@
 import streamlit as st
 import requests
 
-# Directly use the public deployment URL
+# Backend URL
 BASE_URL = 'https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/'
 
 st.title("Student Management System")
 
+# Select an operation
 operation = st.sidebar.selectbox(
     "Choose an operation",
     ["Create Student", "Get Student by ID", "Get Student by Name", "Update Student", "Delete Student", "Get All Students"]
 )
-
-def make_request(method, url, **kwargs):
-    try:
-        response = requests.request(method, url, **kwargs)
-        response.raise_for_status()
-        return response
-    except requests.RequestException as e:
-        st.error(f"Request failed: {e}")
-        return None
 
 # Create a student
 if operation == "Create Student":
@@ -28,12 +20,11 @@ if operation == "Create Student":
     age = st.number_input("Age", min_value=0)
     
     if st.button("Create"):
-        response = make_request("POST", f"{BASE_URL}/createstudent/{stud_id}", json={"name": name, "age": age})
-        if response:
-            if response.status_code == 200:
-                st.success(f"Student {name} created successfully!")
-            else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+        response = requests.post(f"{BASE_URL}/createstudent/{stud_id}", json={"name": name, "age": age})
+        if response.status_code == 200:
+            st.success(f"Student {name} created successfully!")
+        else:
+            st.error(f"Error: {response.json()['detail']}")
 
 # Get a student by ID
 if operation == "Get Student by ID":
@@ -41,13 +32,12 @@ if operation == "Get Student by ID":
     stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Get"):
-        response = make_request("GET", f"{BASE_URL}/studentid/{stud_id}")
-        if response:
-            if response.status_code == 200:
-                student = response.json()
-                st.write(student)
-            else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+        response = requests.get(f"{BASE_URL}/studentid/{stud_id}")
+        if response.status_code == 200:
+            student = response.json()
+            st.write(student)
+        else:
+            st.error(f"Error: {response.json()['detail']}")
 
 # Get a student by name
 if operation == "Get Student by Name":
@@ -55,16 +45,15 @@ if operation == "Get Student by Name":
     name = st.text_input("Name")
     
     if st.button("Get"):
-        response = make_request("GET", f"{BASE_URL}/getbyname", params={"name": name})
-        if response:
-            if response.status_code == 200:
-                student = response.json()
-                if "data" not in student:
-                    st.write(student)
-                else:
-                    st.error("Student not found")
+        response = requests.get(f"{BASE_URL}/getbyname", params={"name": name})
+        if response.status_code == 200:
+            student = response.json()
+            if "data" not in student:
+                st.write(student)
             else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+                st.error("Student not found")
+        else:
+            st.error(f"Error: {response.json()['detail']}")
 
 # Update a student
 if operation == "Update Student":
@@ -74,12 +63,11 @@ if operation == "Update Student":
     age = st.number_input("Age", min_value=0)
     
     if st.button("Update"):
-        response = make_request("PUT", f"{BASE_URL}/updatestudent/{stud_id}", json={"name": name, "age": age})
-        if response:
-            if response.status_code == 200:
-                st.success(f"Student {stud_id} updated successfully!")
-            else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+        response = requests.put(f"{BASE_URL}/updatestudent/{stud_id}", json={"name": name, "age": age})
+        if response.status_code == 200:
+            st.success(f"Student {stud_id} updated successfully!")
+        else:
+            st.error(f"Error: {response.json()['detail']}")
 
 # Delete a student
 if operation == "Delete Student":
@@ -87,22 +75,20 @@ if operation == "Delete Student":
     stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Delete"):
-        response = make_request("DELETE", f"{BASE_URL}/deletestudent/{stud_id}")
-        if response:
-            if response.status_code == 200:
-                st.success(f"Student {stud_id} deleted successfully!")
-            else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+        response = requests.delete(f"{BASE_URL}/deletestudent/{stud_id}")
+        if response.status_code == 200:
+            st.success(f"Student {stud_id} deleted successfully!")
+        else:
+            st.error(f"Error: {response.json()['detail']}")
 
 # Get all students
 if operation == "Get All Students":
     st.header("All Students")
     
     if st.button("Get"):
-        response = make_request("GET", f"{BASE_URL}/students/")
-        if response:
-            if response.status_code == 200:
-                students = response.json()
-                st.write(students)
-            else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+        response = requests.get(f"{BASE_URL}/students/")
+        if response.status_code == 200:
+            students = response.json()
+            st.write(students)
+        else:
+            st.error(f"Error: {response.json()['detail']}")
