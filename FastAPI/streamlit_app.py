@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
-BASE_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
+BASE_URL = os.getenv('BACKEND_URL', 'https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/')
 
 st.title("Student Management System")
 
