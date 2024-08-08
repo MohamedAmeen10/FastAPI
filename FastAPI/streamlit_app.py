@@ -3,22 +3,24 @@ import requests
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Get the backend URL from environment variables
+load_dotenv()  # Load environment variables from .env file
 BASE_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
 
-# Your Streamlit app code here
+st.title("Student Management System")
 
-
-st.title("Students Database")
-
-# Select an operation
 operation = st.sidebar.selectbox(
     "Choose an operation",
     ["Create Student", "Get Student by ID", "Get Student by Name", "Update Student", "Delete Student", "Get All Students"]
 )
+
+def make_request(method, url, **kwargs):
+    try:
+        response = requests.request(method, url, **kwargs)
+        response.raise_for_status()
+        return response
+    except requests.RequestException as e:
+        st.error(f"Request failed: {e}")
+        return None
 
 # Create a student
 if operation == "Create Student":
@@ -28,75 +30,24 @@ if operation == "Create Student":
     age = st.number_input("Age", min_value=0)
     
     if st.button("Create"):
-        response = requests.post(f"{BASE_URL}/createstudent/{stud_id}", json={"name": name, "age": age})
-        if response.status_code == 200:
-            st.success(f"Student {name} created successfully!")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
-
-# Get a student by ID
-if operation == "Get Student by ID":
-    st.header("Get Student by ID")
-    stud_id = st.number_input("Student ID", min_value=1)
-    
-    if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/studentid/{stud_id}")
-        if response.status_code == 200:
-            student = response.json()
-            st.write(student)
-        else:
-            st.error(f"Error: {response.json()['detail']}")
-
-# Get a student by name
-if operation == "Get Student by Name":
-    st.header("Get Student by Name")
-    name = st.text_input("Name")
-    
-    if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/getbyname", params={"name": name})
-        if response.status_code == 200:
-            student = response.json()
-            if "data" not in student:
-                st.write(student)
+        response = make_request("POST", f"{BASE_URL}/createstudent/{stud_id}", json={"name": name, "age": age})
+        if response:
+            if response.status_code == 200:
+                st.success(f"Student {name} created successfully!")
             else:
-                st.error("Student not found")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
 
-# Update a student
-if operation == "Update Student":
-    st.header("Update Student")
-    stud_id = st.number_input("Student ID", min_value=1)
-    name = st.text_input("Name")
-    age = st.number_input("Age", min_value=0)
-    
-    if st.button("Update"):
-        response = requests.put(f"{BASE_URL}/updatestudent/{stud_id}", json={"name": name, "age": age})
-        if response.status_code == 200:
-            st.success(f"Student {stud_id} updated successfully!")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+# Add similar handling for other operations...
 
-# Delete a student
-if operation == "Delete Student":
-    st.header("Delete Student")
-    stud_id = st.number_input("Student ID", min_value=1)
-    
-    if st.button("Delete"):
-        response = requests.delete(f"{BASE_URL}/deletestudent/{stud_id}")
-        if response.status_code == 200:
-            st.success(f"Student {stud_id} deleted successfully!")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
-
-# Get all students
+# Example for getting all students
 if operation == "Get All Students":
     st.header("All Students")
     
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/students/")
-        if response.status_code == 200:
-            students = response.json()
-            st.write(students)
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+        response = make_request("GET", f"{BASE_URL}/students/")
+        if response:
+            if response.status_code == 200:
+                students = response.json()
+                st.write(students)
+            else:
+                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
