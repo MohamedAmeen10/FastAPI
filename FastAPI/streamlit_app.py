@@ -26,7 +26,6 @@ if operation == "Create Student":
         else:
             st.error(f"Error: {response.json()['detail']}")
 
-# Get a student by ID
 if operation == "Get Student by ID":
     st.header("Get Student by ID")
     stud_id = st.number_input("Student ID", min_value=1)
