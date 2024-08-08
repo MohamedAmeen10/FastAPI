@@ -26,18 +26,23 @@ if operation == "Create Student":
         else:
             st.error(f"Error: {response.json()['detail']}")
 
-# Get a student by ID
 if operation == "Get Student by ID":
     st.header("Get Student by ID")
     stud_id = st.number_input("Student ID", min_value=1)
-    
+
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/studentid/{stud_id}")
-        if response.status_code == 200:
-            student = response.json()
-            st.write(student)
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+        response = make_request("GET", f"{BASE_URL}/studentid/{stud_id}")
+        if response:
+            try:
+                if response.text.strip():  # Check if response is not empty
+                    student = response.json()  # Attempt to parse JSON
+                    st.write(student)
+                else:
+                    st.error("Received empty response from server")
+            except requests.exceptions.JSONDecodeError:
+                st.error("Failed to decode JSON from response")
+                st.write("Raw response:", response.text)  # Show raw response
+
 
 # Get a student by name
 if operation == "Get Student by Name":
