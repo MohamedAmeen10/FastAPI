@@ -32,12 +32,27 @@ if operation == "Get Student by ID":
     stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/studentid/{stud_id}")
-        if response.status_code == 200:
+        try:
+            response = requests.get(f"{BASE_URL}/student/{stud_id}")
+            response.raise_for_status()  # Raise an HTTPError for bad responses (4xx, 5xx)
+            
+            # Attempt to parse the response as JSON
             student = response.json()
             st.write(student)
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+            
+        except requests.exceptions.HTTPError as http_err:
+            st.error(f"HTTP error occurred: {http_err}")
+            try:
+                # Show error details if available in the response
+                error_detail = response.json().get('detail', 'No additional error details provided')
+                st.error(f"Error: {error_detail}")
+            except requests.exceptions.JSONDecodeError:
+                st.error("Failed to parse the error response as JSON.")
+                st.write("Raw response content:", response.text)
+        
+        except requests.exceptions.RequestException as req_err:
+            st.error(f"Request error occurred: {req_err}")
+
 
 # Get a student by name
 if operation == "Get Student by Name":
