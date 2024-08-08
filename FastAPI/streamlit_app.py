@@ -3,8 +3,9 @@ import requests
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
-BASE_URL = os.getenv('BACKEND_URL', 'https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/')
+# Load environment variables
+load_dotenv()
+BASE_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
 
 st.title("Student Management System")
 
@@ -37,17 +38,4 @@ if operation == "Create Student":
             else:
                 st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
 
-# Add similar handling for other operations...
-
-# Example for getting all students
-if operation == "Get All Students":
-    st.header("All Students")
-    
-    if st.button("Get"):
-        response = make_request("GET", f"{BASE_URL}/students/")
-        if response:
-            if response.status_code == 200:
-                students = response.json()
-                st.write(students)
-            else:
-                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+# Other operations would follow a similar pattern
