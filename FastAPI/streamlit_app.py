@@ -1,10 +1,8 @@
 import streamlit as st
 import requests
-import os
-from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
-BASE_URL = os.getenv('https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/', 'http://127.0.0.1:8000')
+# Directly use the public deployment URL
+BASE_URL = 'https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/'
 
 st.title("Student Management System")
 
@@ -37,17 +35,38 @@ if operation == "Create Student":
             else:
                 st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
 
-# Add similar handling for other operations...
-
-# Example for getting all students
-if operation == "Get All Students":
-    st.header("All Students")
+# Get a student by ID
+if operation == "Get Student by ID":
+    st.header("Get Student by ID")
+    stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Get"):
-        response = make_request("GET", f"{BASE_URL}/students/")
+        response = make_request("GET", f"{BASE_URL}/studentid/{stud_id}")
         if response:
             if response.status_code == 200:
-                students = response.json()
-                st.write(students)
+                student = response.json()
+                st.write(student)
             else:
                 st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+
+# Get a student by name
+if operation == "Get Student by Name":
+    st.header("Get Student by Name")
+    name = st.text_input("Name")
+    
+    if st.button("Get"):
+        response = make_request("GET", f"{BASE_URL}/getbyname", params={"name": name})
+        if response:
+            if response.status_code == 200:
+                student = response.json()
+                if "data" not in student:
+                    st.write(student)
+                else:
+                    st.error("Student not found")
+            else:
+                st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+
+# Update a student
+if operation == "Update Student":
+    st.header("Update Student")
+    stud_id = st.number_in
