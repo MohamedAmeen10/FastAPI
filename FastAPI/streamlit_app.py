@@ -1,8 +1,16 @@
 import streamlit as st
 import requests
+import os
+from dotenv import load_dotenv
 
-# Backend URL
-BASE_URL = "http://127.0.0.1:8000"
+# Load environment variables from .env file
+load_dotenv()
+
+# Get the backend URL from environment variables
+BASE_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
+
+# Your Streamlit app code here
+
 
 st.title("Students Database")
 
