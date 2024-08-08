@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Backend URL
-BASE_URL = "https://my-fastapi-backend.com"
+BASE_URL = "http://127.0.0.1:8000"
 
 st.title("Students Database")
 
