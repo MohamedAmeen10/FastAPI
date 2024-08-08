@@ -2,3 +2,4 @@ fastapi
 pydantic
 streamlit
 requests
+python-dotenv
