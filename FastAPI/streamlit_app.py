@@ -2,14 +2,31 @@ import streamlit as st
 import requests
 
 # Backend URL
-BASE_URL = 'https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/'
+BASE_URL = 'https://fastapi-hzcycy9nnfbqb6eeetzzqc.streamlit.app/'  # Replace with your actual FastAPI URL
 
 st.title("Student Management System")
+
+# Helper function to make API requests and handle errors
+def make_request(method, url, **kwargs):
+    try:
+        response = requests.request(method, url, **kwargs)
+        response.raise_for_status()  # Raises HTTPError for bad responses
+        
+        # Check if the response is in JSON format
+        if 'application/json' in response.headers.get('Content-Type', ''):
+            return response.json()
+        else:
+            st.error(f"Expected JSON response, but got: {response.headers.get('Content-Type')}")
+            st.write("Raw response content:", response.text)
+            return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Request failed: {e}")
+        return None
 
 # Select an operation
 operation = st.sidebar.selectbox(
     "Choose an operation",
-    ["Create Student", "Get Student by ID", "Get Student by Name", "Update Student", "Delete Student", "Get All Students"]
+    ["Create Student", "Get Student by ID", "Update Student", "Delete Student"]
 )
 
 # Create a student
@@ -20,45 +37,20 @@ if operation == "Create Student":
     age = st.number_input("Age", min_value=0)
     
     if st.button("Create"):
-        response = requests.post(f"{BASE_URL}/createstudent/{stud_id}", json={"name": name, "age": age})
-        if response.status_code == 200:
+        response = make_request("POST", f"{BASE_URL}/student/{stud_id}", json={"name": name, "age": age})
+        if response:
             st.success(f"Student {name} created successfully!")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
 
+# Get a student by ID
 if operation == "Get Student by ID":
     st.header("Get Student by ID")
     stud_id = st.number_input("Student ID", min_value=1)
-
-    if st.button("Get"):
-        response = make_request("GET", f"{BASE_URL}/studentid/{stud_id}")
-        if response:
-            try:
-                if response.text.strip():  # Check if response is not empty
-                    student = response.json()  # Attempt to parse JSON
-                    st.write(student)
-                else:
-                    st.error("Received empty response from server")
-            except requests.exceptions.JSONDecodeError:
-                st.error("Failed to decode JSON from response")
-                st.write("Raw response:", response.text)  # Show raw response
-
-
-# Get a student by name
-if operation == "Get Student by Name":
-    st.header("Get Student by Name")
-    name = st.text_input("Name")
     
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/getbyname", params={"name": name})
-        if response.status_code == 200:
-            student = response.json()
-            if "data" not in student:
-                st.write(student)
-            else:
-                st.error("Student not found")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+        response = make_request("GET", f"{BASE_URL}/student/{stud_id}")
+        if response:
+            st.write(f"Name: {response['name']}")
+            st.write(f"Age: {response['age']}")
 
 # Update a student
 if operation == "Update Student":
@@ -68,11 +60,9 @@ if operation == "Update Student":
     age = st.number_input("Age", min_value=0)
     
     if st.button("Update"):
-        response = requests.put(f"{BASE_URL}/updatestudent/{stud_id}", json={"name": name, "age": age})
-        if response.status_code == 200:
+        response = make_request("PUT", f"{BASE_URL}/student/{stud_id}", json={"name": name, "age": age})
+        if response:
             st.success(f"Student {stud_id} updated successfully!")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
 
 # Delete a student
 if operation == "Delete Student":
@@ -80,20 +70,6 @@ if operation == "Delete Student":
     stud_id = st.number_input("Student ID", min_value=1)
     
     if st.button("Delete"):
-        response = requests.delete(f"{BASE_URL}/deletestudent/{stud_id}")
-        if response.status_code == 200:
+        response = make_request("DELETE", f"{BASE_URL}/student/{stud_id}")
+        if response:
             st.success(f"Student {stud_id} deleted successfully!")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
-
-# Get all students
-if operation == "Get All Students":
-    st.header("All Students")
-    
-    if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/students/")
-        if response.status_code == 200:
-            students = response.json()
-            st.write(students)
-        else:
-            st.error(f"Error: {response.json()['detail']}")
