@@ -60,15 +60,30 @@ if operation == "Get Student by Name":
     name = st.text_input("Name")
     
     if st.button("Get"):
-        response = requests.get(f"{BASE_URL}/getbyname", params={"name": name})
-        if response.status_code == 200:
+        try:
+            response = requests.get(f"{BASE_URL}/getbyname", params={"name": name})
+            response.raise_for_status()  # Raise an HTTPError for bad responses (4xx, 5xx)
+            
+            # Attempt to parse the response as JSON
             student = response.json()
             if "data" not in student:
                 st.write(student)
             else:
                 st.error("Student not found")
-        else:
-            st.error(f"Error: {response.json()['detail']}")
+                
+        except requests.exceptions.HTTPError as http_err:
+            st.error(f"HTTP error occurred: {http_err}")
+            try:
+                # Show error details if available in the response
+                error_detail = response.json().get('detail', 'No additional error details provided')
+                st.error(f"Error: {error_detail}")
+            except requests.exceptions.JSONDecodeError:
+                st.error("Failed to parse the error response as JSON.")
+                st.write("Raw response content:", response.text)
+        
+        except requests.exceptions.RequestException as req_err:
+            st.error(f"Request error occurred: {req_err}")
+
 
 # Update a student
 if operation == "Update Student":
